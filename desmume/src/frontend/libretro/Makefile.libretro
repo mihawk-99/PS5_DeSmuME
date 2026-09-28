@@ -62,8 +62,19 @@ ifneq ($(GIT_VERSION)," unknown")
 	CXXFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
 endif
 
+# PS5 (a homebrew title's libretro core): no OpenGL and no pcap; the software
+# renderer upscales. The console's libraries resolve at load time.
+ifeq ($(platform), ps5)
+   TARGET := $(TARGET_NAME)_libretro.so
+   fpic := -fPIC
+   SHARED := -shared -Wl,--version-script=$(CORE_DIR)/frontend/libretro/link.T
+   LIBS :=
+   CXXFLAGS += -std=gnu++11
+   DESMUME_OPENGL = 0
+   DESMUME_JIT ?= 1
+
 # Unix
-ifneq (,$(findstring unix,$(platform)))
+else ifneq (,$(findstring unix,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.so
    fpic := -fPIC
    SHARED := -shared -Wl,--no-undefined -Wl,--version-script=$(CORE_DIR)/frontend/libretro/link.T

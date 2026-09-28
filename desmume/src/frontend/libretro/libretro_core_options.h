@@ -148,7 +148,12 @@ struct retro_core_option_v2_definition option_defs_us[] = {
             { "4",  NULL },
             { NULL, NULL },
         },
+#ifdef __PROSPERO__
+        /* The software rasterizer on every thread the option offers. */
+        "4"
+#else
         "1"
+#endif
     },
     {
         "desmume_cpu_mode",
@@ -341,7 +346,12 @@ struct retro_core_option_v2_definition option_defs_us[] = {
             { "2560x1920",  "10x (2560x1920)" },
             { NULL, NULL },
         },
+#ifdef __PROSPERO__
+        /* The PS5 renders DS 3D at the highest internal resolution, 10x. */
+        "2560x1920"
+#else
         "256x192"
+#endif
     },
 #ifdef HAVE_OPENGL
     {
@@ -473,7 +483,12 @@ struct retro_core_option_v2_definition option_defs_us[] = {
             { "enabled",   NULL },
             { NULL, NULL },
         },
+#ifdef __PROSPERO__
+        /* Colour interpolation at the high internal resolution. */
+        "enabled"
+#else
         "disabled"
+#endif
     },
     {
         "desmume_gfx_linehack",
