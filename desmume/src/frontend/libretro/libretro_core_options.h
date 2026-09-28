@@ -146,11 +146,16 @@ struct retro_core_option_v2_definition option_defs_us[] = {
             { "2",  NULL },
             { "3",  NULL },
             { "4",  NULL },
+#ifdef __PROSPERO__
+            /* The rasterizer takes up to 32 threads, and the PS5 gives a title
+             * more than four hardware threads. */
+            { "6",  NULL },
+            { "8",  NULL },
+#endif
             { NULL, NULL },
         },
 #ifdef __PROSPERO__
-        /* The software rasterizer on every thread the option offers. */
-        "4"
+        "8"
 #else
         "1"
 #endif
@@ -352,8 +357,10 @@ struct retro_core_option_v2_definition option_defs_us[] = {
             { NULL, NULL },
         },
 #ifdef __PROSPERO__
-        /* The PS5 renders DS 3D at the highest internal resolution, 10x. */
-        "2560x1920"
+        /* The highest resolution that holds full speed on the PS5: in Pokemon
+         * Diamond's intro, 10x ran at 43% of full speed, 8x at 60%, 6x at 93-95%
+         * and 5x at 100% (the 2D engines draw every layer at this size too). */
+        "1280x960"
 #else
         "256x192"
 #endif
