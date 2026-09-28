@@ -198,13 +198,32 @@ static u8 recompile_counts[(1<<26)/16];
 // Reduces memory needed for function pointers.
 // FIXME win64 needs this too, x86_32 doesn't
 
+#ifdef __PROSPERO__
+// The PS5 runs code from direct memory the payload SDK fork's platform layer
+// maps read-write-execute (ps5platform/exec.h), placed within 2 GiB of this
+// code so calls from the buffer keep their 32-bit displacements.
+#include <ps5platform/exec.h>
+static const size_t scratchpad_size = 1<<25;
+static u8 *scratchpad;
+#else
 DS_ALIGN(4096) static u8 scratchpad[1<<25];
+static const size_t scratchpad_size = sizeof(scratchpad);
+#endif
 static u8 *scratchptr;
 
 struct ASMJIT_API StaticCodeGenerator : public Context
 {
 	StaticCodeGenerator()
 	{
+#ifdef __PROSPERO__
+		scratchpad = static_cast<u8 *>(ps5_exec_allocate(scratchpad_size, (uintptr_t)&arm_jit_reset));
+		if(!scratchpad)
+		{
+			fprintf(stderr, "no executable memory for the JIT\n");
+			abort();
+		}
+		scratchptr = scratchpad;
+#else
 		scratchptr = scratchpad;
 		int align = (uintptr_t)scratchpad & (sysconf(_SC_PAGESIZE) - 1);
 		int err = mprotect(scratchpad-align, sizeof(scratchpad)+align, PROT_READ|PROT_WRITE|PROT_EXEC);
@@ -213,6 +232,7 @@ struct ASMJIT_API StaticCodeGenerator : public Context
 			fprintf(stderr, "mprotect failed: %s\n", strerror(errno));
 			abort();
 		}
+#endif
 	}
 
 	uint32_t generate(void** dest, Assembler* assembler)
@@ -223,7 +243,7 @@ struct ASMJIT_API StaticCodeGenerator : public Context
 			*dest = NULL;
 			return kErrorNoFunction;
 		}
-		if(size > (uintptr_t)(scratchpad+sizeof(scratchpad)-scratchptr))
+		if(size > (uintptr_t)(scratchpad+scratchpad_size-scratchptr))
 		{
 			fprintf(stderr, "Out of memory for asmjit. Clearing code cache.\n");
 			arm_jit_reset(1);

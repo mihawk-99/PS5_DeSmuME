@@ -173,7 +173,12 @@ struct retro_core_option_v2_definition option_defs_us[] = {
 #endif
             { NULL, NULL },
         },
+#if defined(__PROSPERO__) && defined(HAVE_JIT)
+        /* The JIT: the PS5's builds have it, and the upscaled renderer needs the time it saves. */
+        "jit"
+#else
         "interpreter"
+#endif
     },
 #ifdef HAVE_JIT
     {

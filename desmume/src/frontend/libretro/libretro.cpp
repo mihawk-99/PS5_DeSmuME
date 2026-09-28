@@ -797,6 +797,7 @@ static void check_variables(bool first_boot)
           }
       }
 
+#ifdef HAVE_OPENGL
       var.key = "desmume_opengl_mode";
 
       if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
@@ -808,6 +809,10 @@ static void check_variables(bool first_boot)
       }
       else
          opengl_mode = false;
+#else
+      /* Built without OpenGL: its options are not defined, so not asked for. */
+      opengl_mode = false;
+#endif
 
       var.key = "desmume_color_depth";
       if (opengl_mode && environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
@@ -1052,6 +1057,7 @@ static void check_variables(bool first_boot)
    else
       firmwareLanguage = 1;
 
+#ifdef HAVE_OPENGL
    var.key = "desmume_opengl_shadow_polygon";
    CommonSettings.OpenGL_Emulation_ShadowPolygon = true;
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
@@ -1112,6 +1118,10 @@ static void check_variables(bool first_boot)
    }
    else
       CommonSettings.GFX3D_Renderer_MultisampleSize = 1;
+#else
+   CommonSettings.GFX3D_Renderer_TextureSmoothing = false;
+   CommonSettings.GFX3D_Renderer_MultisampleSize = 1;
+#endif
 
    var.key = "desmume_gfx_highres_interpolate_color";
 
